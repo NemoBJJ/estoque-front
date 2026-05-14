@@ -1,0 +1,54 @@
+.vendas-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.frete-section,
+.pagamento-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px auto;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.frete-section input,
+.frete-section select {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.frete-section button,
+.pagamento-section button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.resultado {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e7f5e9;
+  border-radius: 5px;
+  color: #2e7d32;
+  text-align: left;
+}
+
+.sincronizar {
+  margin: 20px auto;
+  text-align: center;
+}
+
+.sincronizar button {
+  padding: 10px 20px;
+  background-color: #17a2b8;
+}

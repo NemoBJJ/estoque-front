@@ -1,0 +1,72 @@
+.produtos-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.produtos-container table {
+  width: 90%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.produtos-container th,
+.produtos-container td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.produtos-container th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.back-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #2196f3;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #1976d2;
+}
+
+.add-section {
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-section input,
+.add-section select {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-section button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.add-section button:hover {
+  background-color: #45a049;
+}
