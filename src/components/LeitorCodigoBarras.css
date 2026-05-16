@@ -1,0 +1,160 @@
+.leitor-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.leitor-content {
+  background-color: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.leitor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #2c3e50;
+  color: white;
+}
+
+.leitor-header h3 {
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.leitor-body {
+  padding: 20px;
+  text-align: center;
+}
+
+.camera-selector {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.camera-selector label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.camera-selector select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.btn-scan, .btn-stop {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+.btn-scan {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-scan:hover {
+  background-color: #218838;
+}
+
+.btn-stop {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-stop:hover {
+  background-color: #c82333;
+}
+
+.produto-encontrado {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e7f5e9;
+  border-radius: 8px;
+  text-align: left;
+  border-left: 4px solid #28a745;
+}
+
+.produto-encontrado h4 {
+  margin: 0 0 10px 0;
+  color: #28a745;
+}
+
+.produto-encontrado p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.venda-section {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+}
+
+.venda-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.venda-section input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.btn-vender {
+  width: 100%;
+  padding: 12px;
+  background-color: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-vender:hover {
+  background-color: #e0a800;
+}
+
+.btn-vender:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

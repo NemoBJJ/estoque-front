@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import LeitorCodigoBarras from './LeitorCodigoBarras';
 import './Produtos.css';
 
 const Produtos = () => {
@@ -17,6 +18,7 @@ const Produtos = () => {
   const [editandoId, setEditandoId] = useState(null);
   const [moeda, setMoeda] = useState('BRL');
   const [vendaModal, setVendaModal] = useState({ show: false, produto: null, quantidade: 1 });
+  const [showLeitor, setShowLeitor] = useState(false);
 
   useEffect(() => {
     carregarProdutos();
@@ -105,7 +107,6 @@ const Produtos = () => {
     });
   };
 
-  // Função corrigida para registrar venda e atualizar estoque
   const realizarVenda = async () => {
     const { produto, quantidade } = vendaModal;
     if (!produto || quantidade < 1) return;
@@ -117,11 +118,9 @@ const Produtos = () => {
     }
     
     try {
-      // Busca os dados completos do produto
       const response = await api.get(`/produtos/${produto.id}`);
       const produtoCompleto = response.data;
       
-      // Atualiza apenas a quantidade
       const produtoAtualizado = {
         ...produtoCompleto,
         quantidade: novaQuantidade
@@ -137,18 +136,39 @@ const Produtos = () => {
     }
   };
 
+  const handleProdutoEncontrado = (produto) => {
+    // Fecha o leitor e abre o modal de venda automaticamente
+    setShowLeitor(false);
+    setVendaModal({ show: true, produto, quantidade: 1 });
+  };
+
   return (
     <div className="produtos-container">
       <h2>📋 Lista de Produtos</h2>
 
-      {/* Controle de Moeda */}
-      <div>
-        <label>Moeda: </label>
-        <select value={moeda} onChange={(e) => setMoeda(e.target.value)}>
-          <option value="BRL">Real (BRL)</option>
-          <option value="USD">Dólar (USD)</option>
-          <option value="EUR">Euro (EUR)</option>
-        </select>
+      {/* Controle de Moeda e Botão Leitor */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <label>Moeda: </label>
+          <select value={moeda} onChange={(e) => setMoeda(e.target.value)}>
+            <option value="BRL">Real (BRL)</option>
+            <option value="USD">Dólar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+          </select>
+        </div>
+        <button 
+          onClick={() => setShowLeitor(true)} 
+          style={{ 
+            padding: '10px 20px', 
+            backgroundColor: '#17a2b8', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          📷 Ler Código de Barras
+        </button>
       </div>
 
       {/* Formulário de Produto */}
@@ -256,6 +276,14 @@ const Produtos = () => {
             <button onClick={() => setVendaModal({ show: false, produto: null, quantidade: 1 })}>Cancelar</button>
           </div>
         </div>
+      )}
+
+      {/* Modal do Leitor de Código de Barras */}
+      {showLeitor && (
+        <LeitorCodigoBarras
+          onProdutoEncontrado={handleProdutoEncontrado}
+          onClose={() => setShowLeitor(false)}
+        />
       )}
 
       <div>
