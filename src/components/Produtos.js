@@ -137,7 +137,6 @@ const Produtos = () => {
   };
 
   const handleProdutoEncontrado = (produto) => {
-    // Fecha o leitor e abre o modal de venda automaticamente
     setShowLeitor(false);
     setVendaModal({ show: true, produto, quantidade: 1 });
   };
@@ -171,7 +170,45 @@ const Produtos = () => {
         </button>
       </div>
 
-      {/* Formulário de Produto */}
+      {/* TABELA DE PRODUTOS (AGORA EM CIMA) */}
+      <div className="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Quantidade</th>
+              <th>Estoque Mínimo</th>
+              <th>Categoria</th>
+              <th>Cód. Interno</th>
+              <th>Cód. Barras</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {produtos.map((produto) => (
+              <tr key={produto.id}>
+                <td>{produto.id}</td>
+                <td>{produto.nome}</td>
+                <td>{moeda === 'BRL' ? `R$ ${produto.preco}` : `${moeda} ${produto.preco}`}</td>
+                <td>{produto.quantidade !== undefined && produto.quantidade !== null ? produto.quantidade : '0'}</td>
+                <td>{produto.estoqueMinimo !== undefined && produto.estoqueMinimo !== null ? produto.estoqueMinimo : '0'}</td>
+                <td>{produto.categoria || '-'}</td>
+                <td>{produto.codigoInterno || '-'}</td>
+                <td>{produto.codigoBarras || '-'}</td>
+                <td>
+                  <button onClick={() => handleEdit(produto)} style={{ marginRight: '5px', backgroundColor: '#ffc107' }}>✏️</button>
+                  <button onClick={() => handleDelete(produto.id)} style={{ backgroundColor: '#dc3545' }}>🗑️</button>
+                  <button onClick={() => setVendaModal({ show: true, produto, quantidade: 1 })} style={{ marginLeft: '5px', backgroundColor: '#28a745' }}>💰 Vender</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* FORMULÁRIO DE PRODUTO (AGORA EM BAIXO) */}
       <div className="add-section">
         <h3>{editandoId ? '✏️ Editar Produto' : '➕ Novo Produto'}</h3>
         <input
@@ -220,42 +257,6 @@ const Produtos = () => {
         <button onClick={handleSubmit}>{editandoId ? 'Atualizar' : 'Adicionar'}</button>
         {editandoId && <button onClick={resetForm}>Cancelar</button>}
       </div>
-
-      {/* Tabela de Produtos */}
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Preço</th>
-            <th>Quantidade</th>
-            <th>Estoque Mínimo</th>
-            <th>Categoria</th>
-            <th>Cód. Interno</th>
-            <th>Cód. Barras</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {produtos.map((produto) => (
-            <tr key={produto.id}>
-              <td>{produto.id}</td>
-              <td>{produto.nome}</td>
-              <td>{moeda === 'BRL' ? `R$ ${produto.preco}` : `${moeda} ${produto.preco}`}</td>
-              <td>{produto.quantidade !== undefined && produto.quantidade !== null ? produto.quantidade : '0'}</td>
-              <td>{produto.estoqueMinimo !== undefined && produto.estoqueMinimo !== null ? produto.estoqueMinimo : '0'}</td>
-              <td>{produto.categoria || '-'}</td>
-              <td>{produto.codigoInterno || '-'}</td>
-              <td>{produto.codigoBarras || '-'}</td>
-              <td>
-                <button onClick={() => handleEdit(produto)} style={{ marginRight: '5px', backgroundColor: '#ffc107' }}>✏️</button>
-                <button onClick={() => handleDelete(produto.id)} style={{ backgroundColor: '#dc3545' }}>🗑️</button>
-                <button onClick={() => setVendaModal({ show: true, produto, quantidade: 1 })} style={{ marginLeft: '5px', backgroundColor: '#28a745' }}>💰 Vender</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
 
       {/* Modal de Venda */}
       {vendaModal.show && (

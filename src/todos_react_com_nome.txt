@@ -1,0 +1,847 @@
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\components\HistoricoVendas.js =====
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../api';
+import './HistoricoVendas.css';
+
+const HistoricoVendas = () => {
+  const [vendas, setVendas] = useState([]);
+  const [resumo, setResumo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filtroProduto, setFiltroProduto] = useState('');
+  const [produtos, setProdutos] = useState([]);
+
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  const carregarDados = async () => {
+    setLoading(true);
+    try {
+      const [vendasRes, resumoRes, produtosRes] = await Promise.all([
+        api.get('/vendas/historico'),
+        api.get('/vendas/resumo'),
+        api.get('/produtos')
+      ]);
+      setVendas(vendasRes.data);
+      setResumo(resumoRes.data);
+      setProdutos(produtosRes.data);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const vendasFiltradas = filtroProduto
+    ? vendas.filter(v => v.produtoId === parseInt(filtroProduto))
+    : vendas;
+
+  const formatarMoeda = (valor) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor || 0);
+  };
+
+  const formatarData = (data) => {
+    return new Date(data).toLocaleString('pt-BR');
+  };
+
+  if (loading) {
+    return <div className="loading">Carregando histórico de vendas...</div>;
+  }
+
+  return (
+    <div className="historico-container">
+      <h2>📊 Histórico de Vendas</h2>
+
+      {/* Cards de Resumo */}
+      <div className="resumo-cards">
+        <div className="card total-vendas">
+          <h3>Total de Vendas</h3>
+          <p>{resumo?.totalVendas || 0}</p>
+        </div>
+        <div className="card vendas-hoje">
+          <h3>Vendas Hoje</h3>
+          <p>{resumo?.vendasHoje || 0}</p>
+          <small>{formatarMoeda(resumo?.faturamentoHoje)}</small>
+        </div>
+        <div className="card vendas-semana">
+          <h3>Vendas (7 dias)</h3>
+          <p>{resumo?.vendasSemana || 0}</p>
+          <small>{formatarMoeda(resumo?.faturamentoSemana)}</small>
+        </div>
+        <div className="card vendas-mes">
+          <h3>Vendas no Mês</h3>
+          <p>{resumo?.vendasMes || 0}</p>
+          <small>{formatarMoeda(resumo?.faturamentoMes)}</small>
+        </div>
+      </div>
+
+      {/* Filtros */}
+      <div className="filtros">
+        <label>Filtrar por produto:</label>
+        <select value={filtroProduto} onChange={(e) => setFiltroProduto(e.target.value)}>
+          <option value="">Todos os produtos</option>
+          {produtos.map(produto => (
+            <option key={produto.id} value={produto.id}>
+              {produto.nome}
+            </option>
+          ))}
+        </select>
+        <button onClick={carregarDados} className="btn-atualizar">🔄 Atualizar</button>
+      </div>
+
+      {/* Tabela de Vendas */}
+      <div className="tabela-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Preço Unit.</th>
+              <th>Total</th>
+              <th>Data/Hora</th>
+              <th>Vendedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {vendasFiltradas.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="nenhuma-venda">
+                  Nenhuma venda registrada ainda.
+                </td>
+              </tr>
+            ) : (
+              vendasFiltradas.map((venda) => (
+                <tr key={venda.id}>
+                  <td>{venda.id}</td>
+                  <td>{venda.produtoNome}</td>
+                  <td>{venda.quantidade}</td>
+                  <td>{formatarMoeda(venda.precoUnitario)}</td>
+                  <td className="total-destaque">{formatarMoeda(venda.total)}</td>
+                  <td>{formatarData(venda.dataVenda)}</td>
+                  <td>{venda.vendedor || 'Sistema'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Botão Voltar */}
+      <div className="back-button-container">
+        <Link to="/">
+          <button className="back-button">← Voltar ao Menu</button>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default HistoricoVendas;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\components\LeitorCodigoBarras.js =====
+import React, { useState, useEffect, useRef } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
+import api from '../api';
+import './LeitorCodigoBarras.css';
+
+const LeitorCodigoBarras = ({ onProdutoEncontrado, onClose }) => {
+  const [scanning, setScanning] = useState(false);
+  const [cameras, setCameras] = useState([]);
+  const [cameraSelecionada, setCameraSelecionada] = useState('');
+  const html5QrCodeRef = useRef(null);
+  const containerId = "scanner-container";
+
+  useEffect(() => {
+    const listarCameras = async () => {
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        setCameras(devices);
+        if (devices.length > 0) {
+          const iriun = devices.find(d => 
+            d.label.toLowerCase().includes('iriun') || 
+            d.label.toLowerCase().includes('mobile') ||
+            d.label.toLowerCase().includes('phone')
+          );
+          setCameraSelecionada(iriun ? iriun.id : devices[0].id);
+        }
+      } catch (err) {
+        console.error("Erro ao listar câmeras:", err);
+      }
+    };
+    listarCameras();
+  }, []);
+
+  const buscarProduto = async (codigo) => {
+    try {
+      const response = await api.get(`/produtos/buscar/codigo-barras/${codigo}`);
+      const produtoEncontrado = response.data;
+      
+      // Fecha o leitor e passa o produto encontrado para o componente pai
+      pararScanner();
+      onClose();
+      
+      if (onProdutoEncontrado) {
+        onProdutoEncontrado(produtoEncontrado);
+      }
+    } catch (error) {
+      console.error("Produto não encontrado:", error);
+      alert(`Código ${codigo} não encontrado!`);
+    }
+  };
+
+  const pararScanner = async () => {
+    if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+      await html5QrCodeRef.current.stop();
+      html5QrCodeRef.current.clear();
+      setScanning(false);
+    }
+  };
+
+  const iniciarScanner = async () => {
+    if (!cameraSelecionada) {
+      alert("Nenhuma câmera disponível!");
+      return;
+    }
+
+    setScanning(true);
+    
+    setTimeout(async () => {
+      const element = document.getElementById(containerId);
+      if (!element) {
+        console.error("Elemento não encontrado!");
+        setScanning(false);
+        return;
+      }
+      
+      if (html5QrCodeRef.current) {
+        await pararScanner();
+      }
+      
+      html5QrCodeRef.current = new Html5Qrcode(containerId);
+      
+      try {
+        await html5QrCodeRef.current.start(
+          { deviceId: { exact: cameraSelecionada } },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          async (decodedText) => {
+            console.log("✅ Código lido:", decodedText);
+            await buscarProduto(decodedText);
+          },
+          (errorMessage) => {
+            // Ignora erros de leitura
+          }
+        );
+      } catch (err) {
+        console.error("Erro ao iniciar scanner:", err);
+        alert("Erro ao acessar a câmera.");
+        setScanning(false);
+      }
+    }, 100);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (html5QrCodeRef.current && html5QrCodeRef.current.isScanning) {
+        html5QrCodeRef.current.stop();
+      }
+    };
+  }, []);
+
+  return (
+    <div className="leitor-modal">
+      <div className="leitor-content">
+        <div className="leitor-header">
+          <h3>📷 Leitor de Código de Barras</h3>
+          <button className="close-btn" onClick={() => {
+            pararScanner();
+            onClose();
+          }}>✖</button>
+        </div>
+        <div className="leitor-body">
+          {!scanning ? (
+            <div className="leitor-start">
+              <p>Aponte a câmera para o código de barras</p>
+              
+              <div className="camera-selector">
+                <label>📷 Selecione a câmera:</label>
+                <select 
+                  value={cameraSelecionada} 
+                  onChange={(e) => setCameraSelecionada(e.target.value)}
+                  disabled={scanning}
+                >
+                  {cameras.map(cam => (
+                    <option key={cam.id} value={cam.id}>
+                      {cam.label || `Câmera ${cam.id.substring(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <button className="btn-scan" onClick={iniciarScanner}>
+                ▶ Iniciar Leitura
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div id={containerId} style={{ width: "100%", height: "auto", borderRadius: "8px", overflow: "hidden" }}></div>
+              <button className="btn-stop" onClick={pararScanner}>
+                ⏹ Parar Leitura
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LeitorCodigoBarras;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\components\Menu.js =====
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './Menu.css';
+
+const Menu = () => {
+  return (
+    <div className="dashboard-container">
+      <h1 className="dashboard-title">📦 Estoque </h1>
+      <div className="cards-grid">
+        <Link to="/produtos" className="card">
+          <div className="card-icon">📦</div>
+          <h2>Produtos</h2>
+          <p></p>
+        </Link>
+        
+        <Link to="/vendas" className="card">
+          <div className="card-icon">💰</div>
+          <h2>Vendas / Frete</h2>
+          <p></p>
+        </Link>
+        
+        <Link to="/historico" className="card">
+          <div className="card-icon">📜</div>
+          <h2>Histórico de Vendas</h2>
+          <p></p>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default Menu;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\components\Produtos.js =====
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../api';
+import LeitorCodigoBarras from './LeitorCodigoBarras';
+import './Produtos.css';
+
+const Produtos = () => {
+  const [produtos, setProdutos] = useState([]);
+  const [novoProduto, setNovoProduto] = useState({ 
+    nome: '', 
+    preco: '', 
+    quantidade: '', 
+    estoqueMinimo: '',
+    categoria: '',
+    codigoInterno: '',
+    codigoBarras: ''
+  });
+  const [editandoId, setEditandoId] = useState(null);
+  const [moeda, setMoeda] = useState('BRL');
+  const [vendaModal, setVendaModal] = useState({ show: false, produto: null, quantidade: 1 });
+  const [showLeitor, setShowLeitor] = useState(false);
+
+  useEffect(() => {
+    carregarProdutos();
+  }, [moeda]);
+
+  const carregarProdutos = async () => {
+    try {
+      const response = await api.get(`/produtos${moeda !== 'BRL' ? `/com-moeda?currency=${moeda}` : ''}`);
+      setProdutos(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const precoFormatado = parseFloat(String(novoProduto.preco).replace(',', '.'));
+      
+      if (editandoId) {
+        await api.put(`/produtos/${editandoId}`, {
+          nome: novoProduto.nome,
+          preco: precoFormatado,
+          quantidade: parseInt(novoProduto.quantidade),
+          estoqueMinimo: parseInt(novoProduto.estoqueMinimo),
+          categoria: novoProduto.categoria,
+          codigoInterno: novoProduto.codigoInterno,
+          codigoBarras: novoProduto.codigoBarras
+        });
+        alert('Produto atualizado com sucesso!');
+      } else {
+        await api.post('/produtos', {
+          nome: novoProduto.nome,
+          preco: precoFormatado,
+          quantidade: parseInt(novoProduto.quantidade),
+          estoqueMinimo: parseInt(novoProduto.estoqueMinimo),
+          categoria: novoProduto.categoria,
+          codigoInterno: novoProduto.codigoInterno,
+          codigoBarras: novoProduto.codigoBarras
+        });
+        alert('Produto adicionado com sucesso!');
+      }
+      resetForm();
+      carregarProdutos();
+    } catch (error) {
+      console.error('Erro ao salvar produto:', error);
+      alert('Erro ao salvar produto.');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+      try {
+        await api.delete(`/produtos/${id}`);
+        carregarProdutos();
+        alert('Produto excluído com sucesso!');
+      } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        alert('Erro ao excluir produto.');
+      }
+    }
+  };
+
+  const handleEdit = (produto) => {
+    setEditandoId(produto.id);
+    setNovoProduto({
+      nome: produto.nome,
+      preco: produto.preco,
+      quantidade: produto.quantidade || 0,
+      estoqueMinimo: produto.estoqueMinimo || 0,
+      categoria: produto.categoria || '',
+      codigoInterno: produto.codigoInterno || '',
+      codigoBarras: produto.codigoBarras || ''
+    });
+  };
+
+  const resetForm = () => {
+    setEditandoId(null);
+    setNovoProduto({ 
+      nome: '', 
+      preco: '', 
+      quantidade: '', 
+      estoqueMinimo: '',
+      categoria: '',
+      codigoInterno: '',
+      codigoBarras: ''
+    });
+  };
+
+  const realizarVenda = async () => {
+    const { produto, quantidade } = vendaModal;
+    if (!produto || quantidade < 1) return;
+    
+    const novaQuantidade = produto.quantidade - quantidade;
+    if (novaQuantidade < 0) {
+      alert(`Estoque insuficiente! Disponível: ${produto.quantidade}`);
+      return;
+    }
+    
+    try {
+      const response = await api.get(`/produtos/${produto.id}`);
+      const produtoCompleto = response.data;
+      
+      const produtoAtualizado = {
+        ...produtoCompleto,
+        quantidade: novaQuantidade
+      };
+      
+      await api.put(`/produtos/${produto.id}`, produtoAtualizado);
+      alert(`✅ Venda de ${quantidade}x ${produto.nome} realizada com sucesso!`);
+      setVendaModal({ show: false, produto: null, quantidade: 1 });
+      carregarProdutos();
+    } catch (error) {
+      console.error('Erro ao registrar venda:', error);
+      alert('❌ Erro ao registrar venda. Verifique o console.');
+    }
+  };
+
+  const handleProdutoEncontrado = (produto) => {
+    setShowLeitor(false);
+    setVendaModal({ show: true, produto, quantidade: 1 });
+  };
+
+  return (
+    <div className="produtos-container">
+      <h2>📋 Lista de Produtos</h2>
+
+      {/* Controle de Moeda e Botão Leitor */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <label>Moeda: </label>
+          <select value={moeda} onChange={(e) => setMoeda(e.target.value)}>
+            <option value="BRL">Real (BRL)</option>
+            <option value="USD">Dólar (USD)</option>
+            <option value="EUR">Euro (EUR)</option>
+          </select>
+        </div>
+        <button 
+          onClick={() => setShowLeitor(true)} 
+          style={{ 
+            padding: '10px 20px', 
+            backgroundColor: '#17a2b8', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          📷 Ler Código de Barras
+        </button>
+      </div>
+
+      {/* TABELA DE PRODUTOS (AGORA EM CIMA) */}
+      <div className="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Preço</th>
+              <th>Quantidade</th>
+              <th>Estoque Mínimo</th>
+              <th>Categoria</th>
+              <th>Cód. Interno</th>
+              <th>Cód. Barras</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {produtos.map((produto) => (
+              <tr key={produto.id}>
+                <td>{produto.id}</td>
+                <td>{produto.nome}</td>
+                <td>{moeda === 'BRL' ? `R$ ${produto.preco}` : `${moeda} ${produto.preco}`}</td>
+                <td>{produto.quantidade !== undefined && produto.quantidade !== null ? produto.quantidade : '0'}</td>
+                <td>{produto.estoqueMinimo !== undefined && produto.estoqueMinimo !== null ? produto.estoqueMinimo : '0'}</td>
+                <td>{produto.categoria || '-'}</td>
+                <td>{produto.codigoInterno || '-'}</td>
+                <td>{produto.codigoBarras || '-'}</td>
+                <td>
+                  <button onClick={() => handleEdit(produto)} style={{ marginRight: '5px', backgroundColor: '#ffc107' }}>✏️</button>
+                  <button onClick={() => handleDelete(produto.id)} style={{ backgroundColor: '#dc3545' }}>🗑️</button>
+                  <button onClick={() => setVendaModal({ show: true, produto, quantidade: 1 })} style={{ marginLeft: '5px', backgroundColor: '#28a745' }}>💰 Vender</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* FORMULÁRIO DE PRODUTO (AGORA EM BAIXO) */}
+      <div className="add-section">
+        <h3>{editandoId ? '✏️ Editar Produto' : '➕ Novo Produto'}</h3>
+        <input
+          type="text"
+          placeholder="Nome"
+          value={novoProduto.nome}
+          onChange={(e) => setNovoProduto({ ...novoProduto, nome: e.target.value })}
+        />
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Preço"
+          value={novoProduto.preco}
+          onChange={(e) => setNovoProduto({ ...novoProduto, preco: e.target.value })}
+        />
+        <input
+          type="number"
+          placeholder="Quantidade"
+          value={novoProduto.quantidade}
+          onChange={(e) => setNovoProduto({ ...novoProduto, quantidade: e.target.value })}
+        />
+        <input
+          type="number"
+          placeholder="Estoque Mínimo"
+          value={novoProduto.estoqueMinimo}
+          onChange={(e) => setNovoProduto({ ...novoProduto, estoqueMinimo: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Categoria"
+          value={novoProduto.categoria}
+          onChange={(e) => setNovoProduto({ ...novoProduto, categoria: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Código Interno"
+          value={novoProduto.codigoInterno}
+          onChange={(e) => setNovoProduto({ ...novoProduto, codigoInterno: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Código de Barras"
+          value={novoProduto.codigoBarras}
+          onChange={(e) => setNovoProduto({ ...novoProduto, codigoBarras: e.target.value })}
+        />
+        <button onClick={handleSubmit}>{editandoId ? 'Atualizar' : 'Adicionar'}</button>
+        {editandoId && <button onClick={resetForm}>Cancelar</button>}
+      </div>
+
+      {/* Modal de Venda */}
+      {vendaModal.show && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>💰 Vender Produto</h3>
+            <p><strong>Produto:</strong> {vendaModal.produto?.nome}</p>
+            <p><strong>Estoque atual:</strong> {vendaModal.produto?.quantidade}</p>
+            <label>Quantidade:</label>
+            <input
+              type="number"
+              min="1"
+              max={vendaModal.produto?.quantidade}
+              value={vendaModal.quantidade}
+              onChange={(e) => setVendaModal({ ...vendaModal, quantidade: parseInt(e.target.value) || 1 })}
+            />
+            <button onClick={realizarVenda} style={{ backgroundColor: '#28a745' }}>Confirmar Venda</button>
+            <button onClick={() => setVendaModal({ show: false, produto: null, quantidade: 1 })}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal do Leitor de Código de Barras */}
+      {showLeitor && (
+        <LeitorCodigoBarras
+          onProdutoEncontrado={handleProdutoEncontrado}
+          onClose={() => setShowLeitor(false)}
+        />
+      )}
+
+      <div>
+        <Link to="/">
+          <button className="back-button">← Voltar ao Menu</button>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default Produtos;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\components\Vendas.js =====
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import api from '../api';
+import './Vendas.css';
+
+const Vendas = () => {
+  const [produtos, setProdutos] = useState([]);
+  const [produtoId, setProdutoId] = useState('');
+  const [cep, setCep] = useState('');
+  const [freteResultado, setFreteResultado] = useState(null);
+  const [pagamentoResultado, setPagamentoResultado] = useState(null);
+  const [sincronizando, setSincronizando] = useState(false);
+
+  useEffect(() => {
+    carregarProdutos();
+  }, []);
+
+  const carregarProdutos = async () => {
+    try {
+      const response = await api.get('/produtos');
+      setProdutos(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
+    }
+  };
+
+  const calcularFrete = async () => {
+    if (!produtoId || !cep) {
+      alert('Selecione um produto e informe o CEP');
+      return;
+    }
+    try {
+      const response = await api.get(`/vendas/calcular-frete/${produtoId}?cep=${cep}`);
+      setFreteResultado(response.data);
+    } catch (error) {
+      console.error('Erro ao calcular frete:', error);
+      alert('Erro ao calcular frete. Verifique o CEP.');
+    }
+  };
+
+  const simularPagamento = async () => {
+    if (!produtoId) {
+      alert('Selecione um produto');
+      return;
+    }
+    try {
+      const response = await api.get(`/vendas/simular-pagamento/${produtoId}`);
+      setPagamentoResultado(response.data);
+    } catch (error) {
+      console.error('Erro ao simular pagamento:', error);
+    }
+  };
+
+  const sincronizarProdutos = async () => {
+    setSincronizando(true);
+    try {
+      const response = await api.get('/vendas/sincronizar');
+      alert('Produtos sincronizados com sucesso!');
+      console.log(response.data);
+    } catch (error) {
+      console.error('Erro ao sincronizar:', error);
+      alert('Erro ao sincronizar produtos');
+    } finally {
+      setSincronizando(false);
+    }
+  };
+
+  const produtoSelecionado = produtos.find(p => p.id === parseInt(produtoId));
+
+  return (
+    <div className="vendas-container">
+      <h2>💰 Vendas / Frete / Pagamento</h2>
+
+      <div className="frete-section">
+        <h3>🚚 Calcular Frete</h3>
+        <select value={produtoId} onChange={(e) => setProdutoId(e.target.value)}>
+          <option value="">Selecione um produto</option>
+          {produtos.map(p => (
+            <option key={p.id} value={p.id}>{p.nome}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="CEP (ex: 01001000)"
+          value={cep}
+          onChange={(e) => setCep(e.target.value)}
+        />
+        <button onClick={calcularFrete}>Calcular Frete</button>
+        {freteResultado && (
+          <div className="resultado">
+            <strong>Resultado:</strong><br />
+            Produto: {freteResultado.produto}<br />
+            Frete: R$ {parseFloat(freteResultado.frete).toFixed(2)}<br />
+            Distância: {freteResultado.distancia_km} km<br />
+            CEP: {freteResultado.cep}
+          </div>
+        )}
+      </div>
+
+      <div className="pagamento-section">
+        <h3>💳 Simular Pagamento</h3>
+        {produtoSelecionado && <p>Produto: {produtoSelecionado.nome}</p>}
+        <button onClick={simularPagamento}>Simular Pagamento</button>
+        {pagamentoResultado && (
+          <div className="resultado">
+            <strong>Resultado:</strong><br />
+            Produto: {pagamentoResultado.produto}<br />
+            Preço Original: R$ {parseFloat(pagamentoResultado.preco_original).toFixed(2)}<br />
+            Valor Final (com taxa 10%): R$ {parseFloat(pagamentoResultado.valor_final).toFixed(2)}
+          </div>
+        )}
+      </div>
+
+      <div className="sincronizar">
+        <button onClick={sincronizarProdutos} disabled={sincronizando}>
+          {sincronizando ? 'Sincronizando...' : '🔄 Sincronizar Produtos'}
+        </button>
+      </div>
+
+      <div>
+        <Link to="/">
+          <button className="back-button">← Voltar ao Menu</button>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default Vendas;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\api.js =====
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:8083/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // Adiciona autenticação básica
+  auth: {
+    username: 'admin',
+    password: 'admin123'
+  }
+});
+
+export default api;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\App.js =====
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Menu from './components/Menu';
+import Produtos from './components/Produtos';
+import Vendas from './components/Vendas';
+import HistoricoVendas from './components/HistoricoVendas';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Menu />} />
+        <Route path="/produtos" element={<Produtos />} />
+        <Route path="/vendas" element={<Vendas />} />
+        <Route path="/historico" element={<HistoricoVendas />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\App.test.js =====
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\index.js =====
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\reportWebVitals.js =====
+const reportWebVitals = onPerfEntry => {
+  if (onPerfEntry && onPerfEntry instanceof Function) {
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS(onPerfEntry);
+      getFID(onPerfEntry);
+      getFCP(onPerfEntry);
+      getLCP(onPerfEntry);
+      getTTFB(onPerfEntry);
+    });
+  }
+};
+
+export default reportWebVitals;
+===== C:\Users\Nemo\Desktop\erp-system\estoque-front\src\setupTests.js =====
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom';

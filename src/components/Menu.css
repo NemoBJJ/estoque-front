@@ -1,56 +1,138 @@
-.dashboard-container {
+.estoque-home {
   min-height: 100vh;
+  padding: 56px 24px;
+  background:
+    radial-gradient(circle at top left, rgba(23, 162, 184, 0.35), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(40, 167, 69, 0.25), transparent 30%),
+    linear-gradient(135deg, #07111f 0%, #0f172a 45%, #111827 100%);
+  color: #f8fafc;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background-color: #f5f5f5;
-  padding: 40px;
 }
 
-.dashboard-title {
+.estoque-hero {
   text-align: center;
-  color: #333;
-  margin-bottom: 60px;
-  font-size: 2.5rem;
+  margin-bottom: 56px;
 }
 
-.cards-grid {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-  max-width: 1200px;
-  margin: 0 auto;
+.estoque-badge {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(23, 162, 184, 0.16);
+  border: 1px solid rgba(23, 162, 184, 0.45);
+  color: #67e8f9;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
 }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 40px 30px;
-  text-align: center;
+.estoque-hero h1 {
+  margin: 0;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  line-height: 0.95;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  text-shadow: 0 14px 45px rgba(34, 211, 238, 0.25);
+}
+
+.estoque-hero p {
+  margin: 22px auto 0;
+  max-width: 680px;
+  font-size: 1.12rem;
+  color: #cbd5e1;
+}
+
+.estoque-cards {
+  width: 100%;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 28px;
+}
+
+.estoque-card {
+  min-height: 260px;
+  padding: 34px;
+  border-radius: 26px;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  width: 220px;
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(14px);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.card:hover {
-  transform: translateY(-5px);
+.estoque-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.produtos-card::before {
+  background: linear-gradient(135deg, #22d3ee, transparent 55%);
+}
+
+.historico-card::before {
+  background: linear-gradient(135deg, #22c55e, transparent 55%);
+}
+
+.estoque-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(103, 232, 249, 0.7);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.52);
 }
 
 .card-icon {
-  font-size: 48px;
-  margin-bottom: 15px;
+  font-size: 3.2rem;
+  margin-bottom: 24px;
 }
 
-.card h2 {
+.estoque-card h2 {
+  margin: 0 0 14px;
+  font-size: 2rem;
+  color: #ffffff;
+}
+
+.estoque-card p {
   margin: 0;
-  font-size: 18px;
-  color: #333;
+  color: #cbd5e1;
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 360px;
 }
 
-/* Cores das bordas superiores */
-.card:nth-child(1) { border-top: 4px solid #17a2b8; }
-.card:nth-child(2) { border-top: 4px solid #28a745; }
-.card:nth-child(3) { border-top: 4px solid #ffc107; }
+.estoque-card span {
+  display: inline-block;
+  margin-top: 28px;
+  font-weight: 900;
+  color: #67e8f9;
+  letter-spacing: 0.02em;
+}
+
+.historico-card span {
+  color: #86efac;
+}
+
+@media (max-width: 760px) {
+  .estoque-home {
+    padding: 38px 16px;
+  }
+
+  .estoque-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .estoque-card {
+    min-height: auto;
+    padding: 28px;
+  }
+}
