@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  ClipboardList, 
+  ScanBarcode, 
+  SquarePen, 
+  Trash2, 
+  ShoppingCart, 
+  CirclePlus, 
+  ArrowLeft 
+} from 'lucide-react';
 import api from '../api';
 import LeitorCodigoBarras from './LeitorCodigoBarras';
 import './Produtos.css';
@@ -143,7 +152,10 @@ const Produtos = () => {
 
   return (
     <div className="produtos-container">
-      <h2>📋 Lista de Produtos</h2>
+      <h2>
+        <ClipboardList size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+        Lista de Produtos
+      </h2>
 
       {/* Controle de Moeda e Botão Leitor */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -163,10 +175,14 @@ const Produtos = () => {
             color: 'white', 
             border: 'none', 
             borderRadius: '5px',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
           }}
         >
-          📷 Ler Código de Barras
+          <ScanBarcode size={18} />
+          Ler Código de Barras
         </button>
       </div>
 
@@ -198,9 +214,24 @@ const Produtos = () => {
                 <td>{produto.codigoInterno || '-'}</td>
                 <td>{produto.codigoBarras || '-'}</td>
                 <td>
-                  <button onClick={() => handleEdit(produto)} style={{ marginRight: '5px', backgroundColor: '#ffc107' }}>✏️</button>
-                  <button onClick={() => handleDelete(produto.id)} style={{ backgroundColor: '#dc3545' }}>🗑️</button>
-                  <button onClick={() => setVendaModal({ show: true, produto, quantidade: 1 })} style={{ marginLeft: '5px', backgroundColor: '#28a745' }}>💰 Vender</button>
+                  <button 
+                    onClick={() => handleEdit(produto)} 
+                    style={{ marginRight: '5px', backgroundColor: '#ffc107', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    <SquarePen size={16} />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(produto.id)} 
+                    style={{ backgroundColor: '#dc3545', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', color: 'white' }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setVendaModal({ show: true, produto, quantidade: 1 })} 
+                    style={{ marginLeft: '5px', backgroundColor: '#28a745', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', color: 'white' }}
+                  >
+                    <ShoppingCart size={16} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -210,7 +241,19 @@ const Produtos = () => {
 
       {/* FORMULÁRIO DE PRODUTO (AGORA EM BAIXO) */}
       <div className="add-section">
-        <h3>{editandoId ? '✏️ Editar Produto' : '➕ Novo Produto'}</h3>
+        <h3>
+          {editandoId ? (
+            <>
+              <SquarePen size={18} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+              Editar Produto
+            </>
+          ) : (
+            <>
+              <CirclePlus size={18} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+              Novo Produto
+            </>
+          )}
+        </h3>
         <input
           type="text"
           placeholder="Nome"
@@ -262,7 +305,10 @@ const Produtos = () => {
       {vendaModal.show && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>💰 Vender Produto</h3>
+            <h3>
+              <ShoppingCart size={18} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+              Vender Produto
+            </h3>
             <p><strong>Produto:</strong> {vendaModal.produto?.nome}</p>
             <p><strong>Estoque atual:</strong> {vendaModal.produto?.quantidade}</p>
             <label>Quantidade:</label>
@@ -289,7 +335,10 @@ const Produtos = () => {
 
       <div>
         <Link to="/">
-          <button className="back-button">← Voltar ao Menu</button>
+          <button className="back-button" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ArrowLeft size={18} />
+            Voltar ao Menu
+          </button>
         </Link>
       </div>
     </div>

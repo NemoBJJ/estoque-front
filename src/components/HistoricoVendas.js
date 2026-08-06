@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ChartColumn, RefreshCw, ArrowLeft } from 'lucide-react';
 import api from '../api';
 import './HistoricoVendas.css';
 
@@ -32,9 +33,7 @@ const HistoricoVendas = () => {
     }
   };
 
-  const vendasFiltradas = filtroProduto
-    ? vendas.filter(v => v.produtoId === parseInt(filtroProduto))
-    : vendas;
+  const vendasFiltradas = filtroProduto ? vendas.filter(v => v.produtoId === parseInt(filtroProduto)) : vendas;
 
   const formatarMoeda = (valor) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -53,7 +52,10 @@ const HistoricoVendas = () => {
 
   return (
     <div className="historico-container">
-      <h2>📊 Histórico de Vendas</h2>
+      <h2>
+        <ChartColumn size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+        Histórico de Vendas
+      </h2>
 
       {/* Cards de Resumo */}
       <div className="resumo-cards">
@@ -89,7 +91,10 @@ const HistoricoVendas = () => {
             </option>
           ))}
         </select>
-        <button onClick={carregarDados} className="btn-atualizar">🔄 Atualizar</button>
+        <button onClick={carregarDados} className="btn-atualizar">
+          <RefreshCw size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+          Atualizar
+        </button>
       </div>
 
       {/* Tabela de Vendas */}
@@ -133,7 +138,10 @@ const HistoricoVendas = () => {
       {/* Botão Voltar */}
       <div className="back-button-container">
         <Link to="/">
-          <button className="back-button">← Voltar ao Menu</button>
+          <button className="back-button" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ArrowLeft size={18} />
+            Voltar ao Menu
+          </button>
         </Link>
       </div>
     </div>

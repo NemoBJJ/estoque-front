@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Package, ChartColumn } from "lucide-react";
 import "./Menu.css";
 
 const Menu = () => {
@@ -13,16 +14,34 @@ const Menu = () => {
 
       <div className="estoque-cards">
         <Link to="/produtos/listar" className="estoque-card produtos-card">
-          <div className="card-icon">📦</div>
+          <div className="card-icon">
+            <Package size={48} strokeWidth={2} />
+          </div>
+
           <h2>Produtos</h2>
-          <p>Visualizar produtos cadastrados, gerenciar CRUD e usar código de barras.</p>
+
+          <p>
+            Visualizar produtos cadastrados, gerenciar CRUD e usar código de
+            barras.
+          </p>
+
           <span>Acessar →</span>
         </Link>
 
-        <Link to="/historico-vendas" className="estoque-card historico-card">
-          <div className="card-icon">📊</div>
+        <Link
+          to="/historico-vendas"
+          className="estoque-card historico-card"
+        >
+          <div className="card-icon">
+            <ChartColumn size={48} strokeWidth={2} />
+          </div>
+
           <h2>Histórico de Vendas</h2>
-          <p>Consultar vendas realizadas, totais, filtros e resumo financeiro.</p>
+
+          <p>
+            Consultar vendas realizadas, totais, filtros e resumo financeiro.
+          </p>
+
           <span>Acessar →</span>
         </Link>
       </div>
