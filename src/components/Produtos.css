@@ -21,8 +21,8 @@
 .produtos-container td {
   border: 1px solid #ddd;
   padding: 10px 8px;
-  text-align: center; /* ← CENTRALIZA TODO O CONTEÚDO */
-  vertical-align: middle; /* alinha verticalmente */
+  text-align: center; /* ALTERADO: centraliza todo o conteúdo */
+  vertical-align: middle;
 }
 
 .produtos-container th {
@@ -32,12 +32,12 @@
 
 /* ===== COLUNA AÇÕES ===== */
 .produtos-container td:last-child {
-  white-space: nowrap; /* não quebra a linha */
-  text-align: center; /* centraliza os botões */
+  white-space: nowrap;
+  text-align: center;
 }
 
 .produtos-container td:last-child button {
-  display: inline-flex; /* permite alinhar ícone e texto */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
@@ -54,21 +54,21 @@
   opacity: 0.85;
 }
 
-/* Cores individuais já estão no JS, mas mantemos aqui por segurança */
+/* Cores individuais (já estão no JS, mas mantemos por segurança) */
 .produtos-container td:last-child button:nth-child(1) {
-  background-color: #ffc107; /* editar */
+  background-color: #ffc107;
   color: #000;
 }
 .produtos-container td:last-child button:nth-child(2) {
-  background-color: #dc3545; /* excluir */
+  background-color: #dc3545;
   color: #fff;
 }
 .produtos-container td:last-child button:nth-child(3) {
-  background-color: #28a745; /* vender */
+  background-color: #28a745;
   color: #fff;
 }
 
-/* ===== BOTÃO VOLTAR – CENTRALIZADO ===== */
+/* ===== BOTÃO VOLTAR ===== */
 .back-button-container {
   display: flex;
   justify-content: center;
@@ -86,6 +86,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  transition: background-color 0.2s;
 }
 
 .back-button:hover {
@@ -157,20 +158,17 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  justify-content: center; /* centraliza o título do modal */
 }
 
 .modal-content p {
   margin: 10px 0;
   font-size: 14px;
-  text-align: center;
 }
 
 .modal-content label {
   font-weight: bold;
   display: block;
   margin-top: 10px;
-  text-align: center;
 }
 
 .modal-content input {
@@ -180,12 +178,11 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-  text-align: center;
 }
 
 .modal-content button {
   padding: 10px 15px;
-  margin: 5px;
+  margin-right: 10px;
   border: none;
   border-radius: 4px;
   cursor: pointer;

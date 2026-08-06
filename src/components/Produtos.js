@@ -186,7 +186,7 @@ const Produtos = () => {
         </button>
       </div>
 
-      {/* TABELA DE PRODUTOS (AGORA EM CIMA) */}
+      {/* TABELA DE PRODUTOS */}
       <div className="tabela-wrapper">
         <table>
           <thead>
@@ -239,7 +239,7 @@ const Produtos = () => {
         </table>
       </div>
 
-      {/* FORMULÁRIO DE PRODUTO (AGORA EM BAIXO) */}
+      {/* FORMULÁRIO DE PRODUTO */}
       <div className="add-section">
         <h3>
           {editandoId ? (
@@ -333,10 +333,11 @@ const Produtos = () => {
         />
       )}
 
-      <div>
+      {/* ===== BOTÃO VOLTAR - AGORA CENTRALIZADO ===== */}
+      <div className="back-button-container">
         <Link to="/">
-          <button className="back-button" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ArrowLeft size={18} />
+          <button className="back-button">
+            <ArrowLeft size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
             Voltar ao Menu
           </button>
         </Link>
