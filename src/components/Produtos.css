@@ -21,7 +21,7 @@
 .produtos-container td {
   border: 1px solid #ddd;
   padding: 10px 8px;
-  text-align: left;
+  text-align: center; /* ← CENTRALIZA TODO O CONTEÚDO */
   vertical-align: middle; /* alinha verticalmente */
 }
 
@@ -68,9 +68,10 @@
   color: #fff;
 }
 
-/* ===== BOTÃO VOLTAR ===== */
+/* ===== BOTÃO VOLTAR – CENTRALIZADO ===== */
 .back-button-container {
-  text-align: center; /* centraliza o botão */
+  display: flex;
+  justify-content: center;
   margin-top: 20px;
 }
 
@@ -156,17 +157,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: center; /* centraliza o título do modal */
 }
 
 .modal-content p {
   margin: 10px 0;
   font-size: 14px;
+  text-align: center;
 }
 
 .modal-content label {
   font-weight: bold;
   display: block;
   margin-top: 10px;
+  text-align: center;
 }
 
 .modal-content input {
@@ -176,11 +180,12 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .modal-content button {
   padding: 10px 15px;
-  margin-right: 10px;
+  margin: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
