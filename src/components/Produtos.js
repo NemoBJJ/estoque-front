@@ -7,7 +7,12 @@ import {
   Trash2, 
   ShoppingCart, 
   CirclePlus, 
-  ArrowLeft 
+  ArrowLeft,
+  Upload,
+  FileText,
+  X,
+  Loader2,
+  History
 } from 'lucide-react';
 import api from '../api';
 import LeitorCodigoBarras from './LeitorCodigoBarras';
@@ -28,9 +33,16 @@ const Produtos = () => {
   const [moeda, setMoeda] = useState('BRL');
   const [vendaModal, setVendaModal] = useState({ show: false, produto: null, quantidade: 1 });
   const [showLeitor, setShowLeitor] = useState(false);
+  const [showModalNota, setShowModalNota] = useState(false);
+  const [showHistoricoNotas, setShowHistoricoNotas] = useState(false);
+  const [arquivoNota, setArquivoNota] = useState(null);
+  const [processandoNota, setProcessandoNota] = useState(false);
+  const [historicoNotas, setHistoricoNotas] = useState([]);
+  const [resultadoNota, setResultadoNota] = useState(null);
 
   useEffect(() => {
     carregarProdutos();
+    carregarHistoricoNotas();
   }, [moeda]);
 
   const carregarProdutos = async () => {
@@ -39,6 +51,15 @@ const Produtos = () => {
       setProdutos(response.data);
     } catch (error) {
       console.error('Erro ao carregar produtos:', error);
+    }
+  };
+
+  const carregarHistoricoNotas = async () => {
+    try {
+      const response = await api.get('/nfe/historico');
+      setHistoricoNotas(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar histórico:', error);
     }
   };
 
@@ -150,12 +171,79 @@ const Produtos = () => {
     setVendaModal({ show: true, produto, quantidade: 1 });
   };
 
+  const handleArquivoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setArquivoNota(file);
+      setResultadoNota(null);
+    }
+  };
+
+  const handleImportarNota = async () => {
+    if (!arquivoNota) {
+      alert('Selecione um arquivo XML');
+      return;
+    }
+
+    setProcessandoNota(true);
+    const formData = new FormData();
+    formData.append('arquivo', arquivoNota);
+    formData.append('usuario', 'admin');
+
+    try {
+      const response = await api.post('/nfe/importar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setResultadoNota(response.data);
+      carregarHistoricoNotas();
+      carregarProdutos();
+    } catch (error) {
+      console.error('Erro:', error);
+      alert('Erro ao importar nota');
+    } finally {
+      setProcessandoNota(false);
+    }
+  };
+
+  const formatarData = (data) => {
+    return new Date(data).toLocaleString('pt-BR');
+  };
+
+  const formatarMoeda = (valor) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(parseFloat(valor?.replace(',', '.')) || 0);
+  };
+
   return (
     <div className="produtos-container">
-      <h2>
-        <ClipboardList size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
-        Lista de Produtos
-      </h2>
+      {/* Cabeçalho com botões Importar e Histórico */}
+      <div className="produtos-header">
+        <h2>
+          <ClipboardList size={24} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+          Lista de Produtos
+        </h2>
+        <div className="header-buttons">
+          <button 
+            onClick={() => setShowModalNota(true)}
+            className="btn-importar-nota"
+          >
+            <Upload size={18} />
+            Importar Nota/XML
+          </button>
+          <button 
+            onClick={() => {
+              setShowHistoricoNotas(true);
+              carregarHistoricoNotas();
+            }}
+            className="btn-historico"
+          >
+            <History size={18} />
+            Histórico de Notas
+          </button>
+        </div>
+      </div>
 
       {/* Controle de Moeda e Botão Leitor */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -333,7 +421,120 @@ const Produtos = () => {
         />
       )}
 
-      {/* ===== BOTÃO VOLTAR - AGORA CENTRALIZADO ===== */}
+      {/* ===== MODAL DE IMPORTAÇÃO DE NOTA ===== */}
+      {showModalNota && (
+        <div className="modal-overlay">
+          <div className="modal-content modal-nota">
+            <div className="modal-header">
+              <h3>
+                <Upload size={20} />
+                Importar Nota Fiscal
+              </h3>
+              <button className="modal-close" onClick={() => setShowModalNota(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {/* Upload */}
+              <div className="upload-area-nota">
+                <label className="file-label">
+                  <FileText size={32} />
+                  <span>{arquivoNota ? arquivoNota.name : 'Clique para selecionar o XML'}</span>
+                  <input
+                    type="file"
+                    accept=".xml"
+                    onChange={handleArquivoChange}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <button
+                  onClick={handleImportarNota}
+                  disabled={!arquivoNota || processandoNota}
+                  className="btn-importar-nota-modal"
+                >
+                  {processandoNota ? (
+                    <>
+                      <Loader2 size={18} className="spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    'Importar Nota'
+                  )}
+                </button>
+              </div>
+
+              {/* Resultado da importação */}
+              {resultadoNota && (
+                <div className="resultado-importacao">
+                  <h4>✅ Importação concluída!</h4>
+                  <div className="resumo-nota">
+                    <span><strong>Nota:</strong> {resultadoNota.numeroNota}</span>
+                    <span><strong>Fornecedor:</strong> {resultadoNota.fornecedor}</span>
+                    <span><strong>Valor:</strong> {formatarMoeda(resultadoNota.valorTotal)}</span>
+                  </div>
+                  <div className="stats-nota">
+                    <span>🆕 Criados: {resultadoNota.totalCriados}</span>
+                    <span>🔄 Atualizados: {resultadoNota.totalAtualizados}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-fechar" onClick={() => setShowModalNota(false)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== MODAL DE HISTÓRICO DE NOTAS ===== */}
+      {showHistoricoNotas && (
+        <div className="modal-overlay">
+          <div className="modal-content modal-nota">
+            <div className="modal-header">
+              <h3>
+                <History size={20} />
+                Histórico de Notas Importadas
+              </h3>
+              <button className="modal-close" onClick={() => setShowHistoricoNotas(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {historicoNotas.length === 0 ? (
+                <p className="sem-notas">Nenhuma nota importada ainda.</p>
+              ) : (
+                <div className="lista-notas">
+                  {historicoNotas.map((nota) => (
+                    <div key={nota.chave} className="item-nota">
+                      <div className="nota-info">
+                        <span className="nota-numero">NF {nota.numeroNota}</span>
+                        <span className="nota-fornecedor">{nota.fornecedor}</span>
+                      </div>
+                      <div className="nota-meta">
+                        <span>{formatarMoeda(nota.valorTotal?.toString())}</span>
+                        <span className="nota-data">{formatarData(nota.dataImportacao)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-fechar" onClick={() => setShowHistoricoNotas(false)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BOTÃO VOLTAR */}
       <div className="back-button-container">
         <Link to="/">
           <button className="back-button">
