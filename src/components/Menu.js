@@ -1,19 +1,85 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Package, ChartColumn } from "lucide-react";
+import { Package, ChartColumn, LogOut } from "lucide-react";
 import "./Menu.css";
 
+const AUTH_URL =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:8087"
+    : "https://auth.neemindev.com";
+
 const Menu = () => {
+  const [saindo, setSaindo] = useState(false);
+
+  const logout = async () => {
+    try {
+      setSaindo(true);
+
+      await fetch(`${AUTH_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Erro ao encerrar sessão:", error);
+    } finally {
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      ) {
+        window.location.href = "/";
+      } else {
+        window.location.href =
+          "https://gestex.neemindev.com/login?redirect=estoque";
+      }
+    }
+  };
+
   return (
     <div className="estoque-home">
+
+      <button
+        type="button"
+        onClick={logout}
+        disabled={saindo}
+        style={{
+          position: "absolute",
+          top: "24px",
+          right: "24px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "10px 16px",
+          borderRadius: "8px",
+          border: "1px solid rgba(255,255,255,0.18)",
+          background: "rgba(255,255,255,0.06)",
+          color: "#ffffff",
+          cursor: saindo ? "default" : "pointer",
+          fontSize: "14px",
+          fontWeight: "600",
+        }}
+      >
+        <LogOut size={18} />
+
+        {saindo ? "Saindo..." : "Sair"}
+      </button>
+
       <div className="estoque-hero">
         <span className="estoque-badge">GesteX</span>
+
         <h1>ESTOQUE</h1>
-        <p>Controle de produtos, vendas e histórico operacional.</p>
+
+        <p>
+          Controle de produtos, vendas e histórico operacional.
+        </p>
       </div>
 
       <div className="estoque-cards">
-        <Link to="/produtos/listar" className="estoque-card produtos-card">
+
+        <Link
+          to="/produtos/listar"
+          className="estoque-card produtos-card"
+        >
           <div className="card-icon">
             <Package size={48} strokeWidth={2} />
           </div>
@@ -44,6 +110,7 @@ const Menu = () => {
 
           <span>Acessar →</span>
         </Link>
+
       </div>
     </div>
   );
