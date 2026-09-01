@@ -1,13 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Menu from './components/Menu';
 import Produtos from './components/Produtos';
 import Vendas from './components/Vendas';
 import LeitorCodigoBarras from './components/LeitorCodigoBarras';
 import HistoricoVendas from './components/HistoricoVendas';
+
 import './App.css';
 
+const AUTH_URL =
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8087'
+    : 'https://auth.neemindev.com';
+
 function App() {
+  const [verificandoAuth, setVerificandoAuth] = useState(true);
+
+  useEffect(() => {
+    const verificarAutenticacao = async () => {
+      try {
+        const response = await fetch(`${AUTH_URL}/api/auth/me`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Usuário não autenticado');
+        }
+
+        setVerificandoAuth(false);
+      } catch (error) {
+        console.log('Usuário não autenticado. Redirecionando para login...');
+
+        if (
+          window.location.hostname !== 'localhost' &&
+          window.location.hostname !== '127.0.0.1'
+        ) {
+          window.location.href =
+            'https://gestex.neemindev.com/login?redirect=estoque';
+        } else {
+          setVerificandoAuth(false);
+        }
+      }
+    };
+
+    verificarAutenticacao();
+  }, []);
+
+  if (verificandoAuth) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#070b16',
+          color: '#ffffff',
+          fontFamily: 'Arial, sans-serif',
+        }}
+      >
+        Verificando autenticação...
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>

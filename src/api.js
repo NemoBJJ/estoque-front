@@ -8,19 +8,16 @@ const BASE_URL = isDevelopment
   ? 'http://localhost:8083/api'
   : 'https://estoque-container.neemindev.com/api';
 
-console.log(
-  `🚀 FrontEnd Estoque - BackEnd: ${BASE_URL}`
-);
+console.log(`🚀 FrontEnd Estoque - BackEnd: ${BASE_URL}`);
 
 const api = axios.create({
   baseURL: BASE_URL,
+
   headers: {
     'Content-Type': 'application/json',
   },
-  auth: {
-    username: 'admin',
-    password: 'admin123'
-  }
+
+  withCredentials: true,
 });
 
 export default api;
