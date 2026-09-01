@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Package, ChartColumn, LogOut } from "lucide-react";
+import {
+  Package,
+  ChartColumn,
+  LogOut,
+  House
+} from "lucide-react";
 import "./Menu.css";
 
 const AUTH_URL =
@@ -11,6 +16,17 @@ const AUTH_URL =
 
 const Menu = () => {
   const [saindo, setSaindo] = useState(false);
+
+  const voltarAoGestex = () => {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
+      window.location.href = "/";
+    } else {
+      window.location.href = "https://gestex.neemindev.com";
+    }
+  };
 
   const logout = async () => {
     try {
@@ -38,40 +54,66 @@ const Menu = () => {
   return (
     <div className="estoque-home">
 
-      <button
-        type="button"
-        onClick={logout}
-        disabled={saindo}
+      <div
         style={{
           position: "absolute",
           top: "24px",
           right: "24px",
           display: "flex",
           alignItems: "center",
-          gap: "8px",
-          padding: "10px 16px",
-          borderRadius: "8px",
-          border: "1px solid rgba(255,255,255,0.18)",
-          background: "rgba(255,255,255,0.06)",
-          color: "#ffffff",
-          cursor: saindo ? "default" : "pointer",
-          fontSize: "14px",
-          fontWeight: "600",
+          gap: "10px",
         }}
       >
-        <LogOut size={18} />
+        <button
+          type="button"
+          onClick={voltarAoGestex}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 16px",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.18)",
+            background: "rgba(255,255,255,0.06)",
+            color: "#ffffff",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "600",
+          }}
+        >
+          <House size={18} />
+          Voltar ao GesteX
+        </button>
 
-        {saindo ? "Saindo..." : "Sair"}
-      </button>
+        <button
+          type="button"
+          onClick={logout}
+          disabled={saindo}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 16px",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.18)",
+            background: "rgba(255,255,255,0.06)",
+            color: "#ffffff",
+            cursor: saindo ? "default" : "pointer",
+            fontSize: "14px",
+            fontWeight: "600",
+          }}
+        >
+          <LogOut size={18} />
+          {saindo ? "Saindo..." : "Sair"}
+        </button>
+      </div>
 
       <div className="estoque-hero">
         <span className="estoque-badge">GesteX</span>
 
         <h1>ESTOQUE</h1>
 
-        <p>
-          Controle de produtos, vendas e histórico operacional.
-        </p>
+        <p>Controle de produtos, vendas e histórico operacional.</p>
       </div>
 
       <div className="estoque-cards">
@@ -85,13 +127,6 @@ const Menu = () => {
           </div>
 
           <h2>Produtos</h2>
-
-          <p>
-            Visualizar produtos cadastrados, gerenciar CRUD e usar código de
-            barras.
-          </p>
-
-          <span>Acessar →</span>
         </Link>
 
         <Link
@@ -103,12 +138,6 @@ const Menu = () => {
           </div>
 
           <h2>Histórico de Vendas</h2>
-
-          <p>
-            Consultar vendas realizadas, totais, filtros e resumo financeiro.
-          </p>
-
-          <span>Acessar →</span>
         </Link>
 
       </div>
